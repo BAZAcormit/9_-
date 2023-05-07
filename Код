@@ -1,0 +1,102 @@
+class Record:
+    def __init__(self, id, name, age, gender, salary):
+        self.id = id
+        self.name = name
+        self.age = age
+        self.gender = gender
+        self.salary = salary
+
+    def __repr__(self):
+        return f"Record(id={self.id}, name='{self.name}', age={self.age}, gender='{self.gender}', salary={self.salary})"
+
+class RecordManager:
+    def __init__(self, filename, delimiter='\t'):
+        self.filename = filename
+        self.delimiter = delimiter
+        self.records = []
+
+    def load(self):
+        with open(self.filename, 'r') as file:
+            # Пропускаем первую строку
+            next(file)
+            for line in file:
+                fields = line.strip().split(self.delimiter)
+                if all(fields):  # Проверяем, что все поля не пустые
+                    id = int(fields[0])
+                    name = fields[1]
+                    age = int(fields[2])
+                    gender = fields[3]
+                    salary = float(fields[4])
+                    # Проверяем, существует ли запись с таким же id в списке records
+                    if not any(record.id == id for record in self.records):
+                        record = Record(id, name, age, gender, salary)
+                        self.records.append(record)
+
+    def save(self):
+        with open(self.filename, 'w') as file:
+            file.write("id\tname\tage\tgender\tsalary\n")
+            for record in self.records:
+                file.write(f"{record.id}\t{record.name}\t{record.age}\t{record.gender}\t{record.salary:.2f}\n")
+
+    def add_record(self, record):
+        # Проверяем, существует ли запись с таким же id
+        for r in self.records:
+            if r.id == record.id:
+                print(f"Запись с id {record.id} уже существует.")
+                return
+        # Если записи с таким id нет, добавляем новую запись
+        self.records.append(record)
+        print(f"Запись с id {record.id} успешно добавлена.")
+
+    def remove_record(self, id):
+        for record in self.records:
+            if record.id == id:
+                self.records.remove(record)
+                print(f"Запись с id {id} успешно удалена.")
+                return
+        print(f"Запись с id {id} не найдена.")
+
+    def update_record(self, id, name=None, age=None, gender=None, salary=None):
+        for record in self.records:
+            if record.id == id:
+                if name is not None:
+                    record.name = name
+                if age is not None:
+                    record.age = age
+                if gender is not None:
+                    record.gender = gender
+                if salary is not None:
+                    record.salary = salary
+                print(f"Запись с id {id} успешно обновлена.")
+                return
+        print(f"Запись с id {id} не найдена.")
+
+    def get_records(self):
+        return self.records
+
+    def visualize(self):
+        for record in self.records:
+            print(record)
+
+
+# Пример использования
+manager = RecordManager('records.txt')
+manager.load()
+records = manager.get_records()
+manager.visualize()
+
+# Добавление новой записи
+record = Record(10, 'Johna Wicka', 55, 'Female', 9500.0)
+manager.add_record(record)
+manager.save()
+manager.visualize()
+
+# Удаление записи
+manager.remove_record(4)
+manager.save()
+manager.visualize()
+
+# Обновление записи
+manager.update_record(2, name='Jane Doe', age=40)
+manager.save()
+manager.visualize()
